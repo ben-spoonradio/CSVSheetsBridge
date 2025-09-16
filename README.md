@@ -1,14 +1,30 @@
-# CSV Sheets Bridge
+# 🚀 CSVSheetsBridge
 
-Google Apps Script를 사용하여 Python과 Google Sheets를 연동하는 라이브러리입니다. 복잡한 OAuth 인증이나 Google Cloud Console 설정 없이 간단하게 Google Sheets를 조작할 수 있습니다.
+Appsflyer CSV 데이터를 자동으로 처리하고 Google Sheets에 업데이트하는 완전 자동화 시스템
 
-## ✨ 특징
+[![Python](https://img.shields.io/badge/python-3.7%2B-blue)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-- **간단한 설정**: OAuth나 서비스 계정 없이 Google Apps Script만으로 설정
-- **안정적인 연결**: Google 인프라에서 실행되는 웹 앱을 통한 안정적인 API 호출
-- **재시도 기능**: 네트워크 오류 시 자동 재시도 지원
-- **CSV 연동**: CSV 파일과 Google Sheets 간의 양방향 동기화
-- **무료**: Google Apps Script는 무료 서비스
+## ✨ 주요 기능
+
+- 🔄 **완전 자동화**: CSV 파일을 읽어 KPI를 계산하고 Google Sheets에 자동 업데이트
+- 🎯 **스마트 분석**: D1 Retained CAC, CPI, CTR 등 핵심 성과 지표 자동 계산
+- 📊 **성과 등급**: A~D 등급 자동 부여로 광고 성과 한눈에 파악
+- 🔍 **시트 자동 감지**: 기존 Google Sheets 시트명을 자동으로 찾아 활용
+- 🛡️ **OAuth 불필요**: Google Apps Script를 통한 간단한 인증 시스템
+
+## 📋 처리 가능한 데이터
+
+### 입력 형식 (Data_dua.csv)
+```
+Ad, Cost (sum), Impressions (sum), Clicks (sum), Installs (sum), Unique Users - etc_sign_up (sum), Retention Day 01 (sum)
+```
+
+### 출력 결과
+- **메인 데이터**: 전체 광고 데이터 + 계산된 KPI
+- **요약 통계**: 매체별/테마별 분포 및 평균 지표
+- **상위 성과**: Top 10 광고 랭킹
+- **피벗 분석**: 매체별 교차 분석 테이블
 
 ## 🚀 빠른 시작
 
@@ -33,206 +49,179 @@ Google Apps Script를 사용하여 Python과 Google Sheets를 연동하는 라�
 4. "배포" 클릭
 5. 웹 앱 URL 복사 (예: `https://script.google.com/macros/s/SCRIPT_ID/exec`)
 
-### 2. Python 환경 설정
-
-#### 2-1. 패키지 설치
+### 2. 저장소 클론 및 설정
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/yourusername/CSVSheetsBridge.git
+cd CSVSheetsBridge
 ```
 
-#### 2-2. 환경변수 설정
+### 3. 의존성 설치
 ```bash
-# .env 파일 생성
-cp .env.template .env
+pip install pandas numpy python-dotenv requests
 ```
 
-`.env` 파일에 실제 값을 입력:
+### 4. 환경변수 설정
+
+`.env` 파일 생성:
 ```env
+# Google Apps Script 웹 앱 URL
 GOOGLE_SHEETS_WEB_APP_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
-GOOGLE_SHEETS_SHEET_ID=YOUR_SHEET_ID
+
+# Google Sheets ID (URL에서 /d/ 다음 부분)
+GOOGLE_SHEETS_SHEET_ID=YOUR_SPREADSHEET_ID
+
+# 접근 토큰 (선택사항)
+GOOGLE_SHEETS_ACCESS_TOKEN=YourSecureToken
 ```
 
-## 📖 사용법
+### 5. 실행
+```bash
+# 기본 실행
+python appsflyer_automation_real.py --csv Data_dua.csv
 
-### 기본 사용
+# 백업과 함께 실행
+python appsflyer_automation_real.py --csv Data_dua.csv --backup
 
-```python
-from src.sheets_client import GoogleSheetsClient
-
-# 클라이언트 생성
-client = GoogleSheetsClient('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec')
-
-# 데이터 읽기
-result = client.read_sheet('YOUR_SHEET_ID')
-print(result['data'])
-
-# 행 추가
-new_data = [
-    ['이름', '나이', '도시'],
-    ['김철수', 25, '서울']
-]
-client.append_rows('YOUR_SHEET_ID', new_data)
-
-# 특정 범위 업데이트
-update_data = [['새로운 값', '업데이트됨']]
-client.update_range('YOUR_SHEET_ID', 'A1:B1', update_data)
-
-# 시트 전체 덮어쓰기
-overwrite_data = [
-    ['제품명', '가격'],
-    ['노트북', 1000000],
-    ['마우스', 30000]
-]
-client.overwrite_sheet('YOUR_SHEET_ID', overwrite_data)
+# 처리된 데이터 CSV로도 저장
+python appsflyer_automation_real.py --csv Data_dua.csv --backup --export
 ```
 
-### 재시도 기능이 포함된 안정적인 클라이언트
+## 📊 사용 예시
 
-```python
-from src.sheets_client import RobustGoogleSheetsClient
+### 실행 결과 예시
+```
+🚀 실제 Appsflyer 데이터 자동화 시작
+======================================================================
+📊 CSV 파일 구조 분석
+파일: Data_dua.csv
+총 행 수: 27 행
+컬럼 수: 7 개
 
-# 재시도 기능이 포함된 클라이언트
-robust_client = RobustGoogleSheetsClient('YOUR_WEB_APP_URL')
+   🔄 데이터 로딩 및 정제 중...
+   ✅ 데이터 처리 완료
+📤 Google Sheets 업데이트 시작...
+   ✅ 모든 시트 업데이트 성공!
+   📊 업데이트된 시트: 4/4
 
-# 네트워크 오류 시 자동으로 3번까지 재시도
-result = robust_client.read_sheet('YOUR_SHEET_ID')
+📈 처리 결과 요약
+======================================================================
+총 광고 수: 27개
+총 비용: $12,345.67
+총 설치 수: 1,234개
+평균 D1 Retained CAC: $45.67
+
+📱 매체별 분포:
+  echo: 16개
+  innoceans: 6개
+  tiktok: 4개
+  spoon: 1개
+
+🏆 성과 등급 분포:
+  A등급: 4개
+  B등급: 7개
+  C등급: 6개
+  D등급: 10개
+
+⏱️ 실행 시간: 7.2초
+🎉 Data_dua.csv 자동화 완료!
 ```
 
-### CSV 파일과 연동
+## ⚙️ 명령행 옵션
 
-```python
-from examples.csv_integration import csv_to_sheets, sheets_to_csv
+| 옵션 | 설명 | 예시 |
+|------|------|------|
+| `--csv` | 처리할 CSV 파일 경로 | `--csv Data_dua.csv` |
+| `--backup` | 업데이트 전 현재 데이터 백업 | `--backup` |
+| `--export` | 처리된 데이터를 CSV로 내보내기 | `--export` |
+| `--verbose` | 상세 로그 출력 | `--verbose` |
 
-# CSV 파일을 Google Sheets로 업로드
-csv_to_sheets('data.csv', 'YOUR_WEB_APP_URL', 'YOUR_SHEET_ID')
+## 📈 KPI 계산 방식
 
-# Google Sheets를 CSV 파일로 다운로드
-sheets_to_csv('YOUR_WEB_APP_URL', 'YOUR_SHEET_ID', 'output.csv')
-```
+### 핵심 지표
+- **D1 Retained CAC**: `비용 ÷ D1 유지 유저 수` (주요 성과 지표)
+- **CPI**: `비용 ÷ 설치 수`
+- **CPC**: `비용 ÷ 클릭 수`
+- **CTR**: `(클릭 수 ÷ 노출 수) × 100`
+
+### 성과 등급 기준
+- **A등급** (상위 20%): 최우수 성과
+- **B등급** (상위 21-50%): 우수 성과
+- **C등급** (상위 51-80%): 보통 성과
+- **D등급** (하위 20%): 개선 필요
 
 ## 📁 프로젝트 구조
 
 ```
 CSVSheetsBridge/
-├── apps_script/
-│   └── Code.gs                 # Google Apps Script 코드
-├── src/
-│   └── sheets_client.py        # Python 클라이언트 라이브러리
-├── examples/
-│   ├── basic_usage.py         # 기본 사용 예제
-│   └── csv_integration.py     # CSV 연동 예제
-├── config/
-│   └── settings.py            # 설정 관리
-├── .env.template              # 환경변수 템플릿
-├── requirements.txt           # Python 의존성
-├── setup.py                   # 패키지 설정
-└── README.md                  # 이 파일
+├── 📄 appsflyer_automation_real.py     # 메인 실행 스크립트
+├── 📄 requirements.md                   # 프로젝트 요구사항 명세
+├── 📁 src/
+│   ├── 📄 appsflyer_processor_adapted.py   # 데이터 처리기
+│   ├── 📄 sheets_updater.py                # Google Sheets 업데이터
+│   ├── 📄 sheets_detector.py               # 시트 자동 감지
+│   └── 📄 sheets_client.py                 # Google Sheets 클라이언트
+├── 📁 apps_script/
+│   └── 📄 Code.gs                          # Google Apps Script 코드
+├── 📁 examples/
+│   ├── 📄 basic_usage.py                   # 기본 사용법 예시
+│   └── 📄 csv_integration.py               # CSV 통합 예시
+└── 📁 config/
+    └── 📄 settings.py                      # 설정 관리
 ```
 
-## 🔧 API 참조
+## 🔧 문제 해결
 
-### GoogleSheetsClient
+### 자주 발생하는 문제
 
-#### `read_sheet(sheet_id, sheet_name='Sheet1')`
-스프레드시트 데이터를 읽습니다.
-
-**매개변수:**
-- `sheet_id` (str): 스프레드시트 ID
-- `sheet_name` (str): 시트 이름 (기본값: 'Sheet1')
-
-**반환값:**
-```python
-{
-    'success': True,
-    'data': [...],  # 2차원 리스트
-    'rows': 10,
-    'columns': 3
-}
-```
-
-#### `append_rows(sheet_id, data, sheet_name='Sheet1')`
-시트에 새 행을 추가합니다.
-
-#### `update_range(sheet_id, range_str, data, sheet_name='Sheet1')`
-특정 범위의 데이터를 업데이트합니다.
-
-#### `overwrite_sheet(sheet_id, data, sheet_name='Sheet1')`
-시트 전체 내용을 새 데이터로 덮어씁니다.
-
-#### `clear_sheet(sheet_id, range_str=None, sheet_name='Sheet1')`
-시트의 내용을 지웁니다.
-
-### 유틸리티 함수
-
-#### `extract_sheet_id_from_url(url)`
-Google Sheets URL에서 스프레드시트 ID를 추출합니다.
-
-```python
-url = "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit"
-sheet_id = extract_sheet_id_from_url(url)
-# 결과: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-```
-
-## 🔍 예제 실행
-
-### 기본 사용 예제
+**Q: "환경변수가 설정되지 않았습니다" 오류**
 ```bash
-python examples/basic_usage.py
+A: .env 파일이 프로젝트 루트에 있는지 확인하고,
+   GOOGLE_SHEETS_WEB_APP_URL과 GOOGLE_SHEETS_SHEET_ID가 올바른지 확인하세요.
 ```
 
-### CSV 연동 예제
+**Q: "시트를 찾을 수 없습니다" 오류**
 ```bash
-python examples/csv_integration.py
+A: Google Sheets에 최소 하나의 시트('시트1' 또는 'Sheet1')가 있는지 확인하세요.
+   시스템이 자동으로 기존 시트를 감지해서 활용합니다.
 ```
 
-## ❗ 주의사항
+**Q: "CSV 파일을 찾을 수 없습니다" 오류**
+```bash
+A: Data_dua.csv 파일이 프로젝트 디렉토리에 있는지 확인하거나,
+   --csv 옵션으로 정확한 파일 경로를 지정하세요.
+```
 
-### 장점
-- **인증 불필요**: OAuth나 서비스 계정 설정 없음
-- **간단한 설정**: Google Apps Script만 작성하면 됨
-- **안정적**: Google 인프라에서 실행
-- **무료**: Google Apps Script는 무료 서비스
+### 로그 확인
+- **`automation_results_real.log`**: 실행 결과 요약
+- **`appsflyer_automation_real.log`**: 상세 처리 과정
 
-### 한계
-- **실행 시간 제한**: Apps Script는 6분 실행 제한
-- **API 호출 제한**: 일일 호출 횟수 제한 있음
-- **네트워크 지연**: HTTP 요청을 통한 간접 접근
+## 🛡️ 보안
+
+- 모든 민감한 정보는 `.env` 파일로 관리
+- `.gitignore`를 통해 민감 데이터 보호
+- Google Apps Script를 통한 안전한 Sheets 접근
 
 ## 🤝 기여하기
 
-1. 이 저장소를 포크합니다
-2. 기능 브랜치를 생성합니다 (`git checkout -b feature/amazing-feature`)
-3. 변경사항을 커밋합니다 (`git commit -m 'Add amazing feature'`)
-4. 브랜치에 푸시합니다 (`git push origin feature/amazing-feature`)
-5. Pull Request를 생성합니다
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📄 라이센스
 
-이 프로젝트는 MIT 라이센스 하에 있습니다. 자세한 내용은 LICENSE 파일을 참조하세요.
-
-## 🆘 문제 해결
-
-### 일반적인 오류
-
-#### "sheetId parameter required"
-- 스프레드시트 ID가 올바르게 설정되었는지 확인
-- URL에서 ID를 정확히 추출했는지 확인
-
-#### "Worksheet not found"
-- 시트 이름이 정확한지 확인 (대소문자 구분)
-- 해당 시트가 스프레드시트에 존재하는지 확인
-
-#### "Request failed"
-- 웹 앱 URL이 올바른지 확인
-- Apps Script 배포 설정에서 액세스 권한 확인
-- 네트워크 연결 상태 확인
-
-### 디버깅
-
-Apps Script에서 로그 확인:
-1. Google Apps Script 편집기에서 "실행" > "로그 보기"
-2. `Logger.log()` 함수를 사용하여 디버그 정보 출력
+이 프로젝트는 MIT 라이센스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
 
 ## 📞 지원
 
-문제가 있거나 질문이 있으시면 GitHub Issues를 통해 문의해 주세요.
+- 이슈 리포트: [GitHub Issues](https://github.com/yourusername/CSVSheetsBridge/issues)
+- 기능 요청: [GitHub Discussions](https://github.com/yourusername/CSVSheetsBridge/discussions)
+
+---
+
+<div align="center">
+
+**🎉 Appsflyer 데이터 분석을 자동화하고 더 나은 성과를 만들어보세요! 🎉**
+
+</div>
