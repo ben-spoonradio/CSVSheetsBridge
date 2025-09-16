@@ -5,3 +5,74 @@ debug_request.json
 response.json
 # reviews 디렉토리는 .gitignore에 추가하지 않음 (리뷰 내역 유지)
 reviews/
+
+# 환경 설정 및 민감한 정보
+.env
+.env.local
+.env.development
+.env.production
+config.json
+settings.json
+credentials.json
+
+# 데이터 파일
+*.csv
+*.xlsx
+*.xls
+Data_*.csv
+processed_data_*.csv
+sample_data.csv
+
+# 로그 파일
+*.log
+logs/
+automation_results_*.log
+appsflyer_automation_*.log
+
+# 백업 파일
+backup_*
+*.backup
+*.bak
+
+# Python 캐시 및 컴파일된 파일
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE 및 에디터 파일
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 운영체제 생성 파일
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 임시 파일
+temp/
+tmp/
+*.tmp
