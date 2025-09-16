@@ -57,6 +57,50 @@ class SheetsUpdater:
                 'pivot_table_sheet': 'Sheet1'
             }
 
+    def ensure_sheet_exists(self, sheet_name: str) -> bool:
+        """시트가 존재하지 않으면 생성 (rate limiting과 fallback 고려)"""
+        import time
+
+        try:
+            # 시트 생성을 직접 시도 (더 간단한 접근법)
+            logger.info(f"시트 '{sheet_name}' 존재 확인 및 생성 시도...")
+
+            # 약간의 지연으로 rate limiting 방지
+            time.sleep(0.5)
+
+            create_result = self.client.create_sheet(self.sheet_id, sheet_name)
+
+            if create_result.get('success'):
+                if create_result.get('message') == 'Sheet already exists':
+                    logger.info(f"시트 '{sheet_name}' 이미 존재함")
+                else:
+                    logger.info(f"시트 '{sheet_name}' 생성 성공")
+                return True
+            else:
+                error_msg = create_result.get('error', '알 수 없는 오류')
+                logger.error(f"시트 '{sheet_name}' 처리 실패: {error_msg}")
+
+                # rate limiting인 경우 재시도
+                if '429' in str(error_msg) or 'rate' in str(error_msg).lower():
+                    logger.info("Rate limiting 감지, 3초 후 재시도...")
+                    time.sleep(3)
+
+                    retry_result = self.client.create_sheet(self.sheet_id, sheet_name)
+                    if retry_result.get('success'):
+                        logger.info(f"재시도로 시트 '{sheet_name}' 처리 성공")
+                        return True
+
+                # 시트가 이미 존재하는 경우 성공으로 처리
+                if 'already exists' in str(error_msg).lower() or 'exist' in str(error_msg).lower():
+                    logger.info(f"시트 '{sheet_name}' 이미 존재함 (오류 메시지에서 감지)")
+                    return True
+
+                return False
+
+        except Exception as e:
+            logger.error(f"시트 존재 확인/생성 중 예외 발생: {str(e)}")
+            return False
+
     def prepare_data_for_sheets(self, df: pd.DataFrame) -> List[List]:
         """DataFrame을 Google Sheets용 2차원 리스트로 변환"""
         if df.empty:
@@ -157,6 +201,10 @@ class SheetsUpdater:
             sheet_name = self.sheet_config['main_data_sheet']
         logger.info(f"메인 데이터 시트 업데이트 시작: {sheet_name}")
 
+        # 시트 존재 확인 및 생성
+        if not self.ensure_sheet_exists(sheet_name):
+            return {'success': False, 'error': f'시트 {sheet_name} 생성 실패'}
+
         # 데이터 준비
         sheet_data = self.prepare_data_for_sheets(df)
 
@@ -185,6 +233,10 @@ class SheetsUpdater:
             sheet_name = self.sheet_config.get('summary_sheet', '요약')
         logger.info(f"요약 시트 업데이트 시작: {sheet_name}")
 
+        # 시트 존재 확인 및 생성
+        if not self.ensure_sheet_exists(sheet_name):
+            return {'success': False, 'error': f'시트 {sheet_name} 생성 실패'}
+
         try:
             # 요약 데이터 생성
             summary_data = self.create_summary_sheet_data(stats)
@@ -208,6 +260,10 @@ class SheetsUpdater:
         if sheet_name is None:
             sheet_name = self.sheet_config.get('top_performers_sheet', '상위성과')
         logger.info(f"상위 성과 시트 업데이트 시작: {sheet_name}")
+
+        # 시트 존재 확인 및 생성
+        if not self.ensure_sheet_exists(sheet_name):
+            return {'success': False, 'error': f'시트 {sheet_name} 생성 실패'}
 
         try:
             # 상위 성과 데이터 생성
@@ -291,6 +347,10 @@ class SheetsUpdater:
         if sheet_name is None:
             sheet_name = self.sheet_config.get('pivot_table_sheet', '피벗테이블')
         logger.info(f"피벗 테이블 시트 업데이트 시작: {sheet_name}")
+
+        # 시트 존재 확인 및 생성
+        if not self.ensure_sheet_exists(sheet_name):
+            return {'success': False, 'error': f'시트 {sheet_name} 생성 실패'}
 
         try:
             # 피벗 데이터 생성

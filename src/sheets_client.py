@@ -6,7 +6,7 @@ from functools import wraps
 
 
 def retry_on_failure(max_retries: int = 3, delay: float = 1.0):
-    """실패 시 재시도 데코레이터"""
+    """실패 시 재시도 데코레이터 (rate limiting 특별 처리 포함)"""
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -16,12 +16,26 @@ def retry_on_failure(max_retries: int = 3, delay: float = 1.0):
                 if 'error' not in result:
                     return result
 
-                if attempt < max_retries - 1:
-                    print(f"재시도 {attempt + 1}/{max_retries}: {result.get('error')}")
-                    time.sleep(delay * (2 ** attempt))
+                error_msg = result.get('error', '')
+
+                # Rate limiting (429) 에러인 경우 더 오래 기다림
+                if '429' in str(error_msg) or 'rate' in str(error_msg).lower():
+                    if attempt < max_retries - 1:
+                        wait_time = delay * (3 ** attempt) + 2  # 더 긴 대기 시간
+                        print(f"Rate limit 감지, 재시도 {attempt + 1}/{max_retries} ({wait_time}초 대기): {error_msg}")
+                        time.sleep(wait_time)
+                    else:
+                        print(f"Rate limit으로 최종 실패: {error_msg}")
+                        return result
                 else:
-                    print(f"최종 실패: {result.get('error')}")
-                    return result
+                    # 일반적인 오류 처리
+                    if attempt < max_retries - 1:
+                        wait_time = delay * (2 ** attempt)
+                        print(f"재시도 {attempt + 1}/{max_retries} ({wait_time}초 대기): {error_msg}")
+                        time.sleep(wait_time)
+                    else:
+                        print(f"최종 실패: {error_msg}")
+                        return result
 
             return result
         return wrapper
@@ -144,6 +158,42 @@ class GoogleSheetsClient:
 
         return self._post_request(payload)
 
+    def create_sheet(self, sheet_id: str, sheet_name: str) -> Dict[str, Any]:
+        """
+        새 시트 생성
+
+        Args:
+            sheet_id: 스프레드시트 ID
+            sheet_name: 생성할 시트 이름
+
+        Returns:
+            응답 데이터 딕셔너리
+        """
+        payload = {
+            'sheetId': sheet_id,
+            'sheetName': sheet_name,
+            'action': 'create_sheet'
+        }
+
+        return self._post_request(payload)
+
+    def get_sheet_names(self, sheet_id: str) -> Dict[str, Any]:
+        """
+        스프레드시트의 모든 시트 이름 조회
+
+        Args:
+            sheet_id: 스프레드시트 ID
+
+        Returns:
+            시트 이름 목록을 포함한 응답 데이터
+        """
+        payload = {
+            'sheetId': sheet_id,
+            'action': 'get_sheet_names'
+        }
+
+        return self._post_request(payload)
+
     def _post_request(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """POST 요청 헬퍼 메서드"""
         try:
@@ -186,6 +236,14 @@ class RobustGoogleSheetsClient(GoogleSheetsClient):
     def clear_sheet(self, sheet_id: str, range_str: Optional[str] = None,
                    sheet_name: str = 'Sheet1'):
         return super().clear_sheet(sheet_id, range_str, sheet_name)
+
+    @retry_on_failure(max_retries=3, delay=1.0)
+    def create_sheet(self, sheet_id: str, sheet_name: str):
+        return super().create_sheet(sheet_id, sheet_name)
+
+    @retry_on_failure(max_retries=3, delay=1.0)
+    def get_sheet_names(self, sheet_id: str):
+        return super().get_sheet_names(sheet_id)
 
 
 def extract_sheet_id_from_url(url: str) -> str:

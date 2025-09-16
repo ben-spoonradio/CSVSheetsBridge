@@ -42,10 +42,14 @@ function doPost(e) {
     }
 
     var sheet = SpreadsheetApp.openById(sheetId);
-    var worksheet = sheet.getSheetByName(sheetName);
+    var worksheet = null;
 
-    if (!worksheet) {
-      return createResponse({error: 'Worksheet not found'}, 404);
+    // 시트 생성 및 시트 목록 조회의 경우 worksheet가 null이어도 됨
+    if (action !== 'create_sheet' && action !== 'get_sheet_names') {
+      worksheet = sheet.getSheetByName(sheetName);
+      if (!worksheet) {
+        return createResponse({error: 'Worksheet not found'}, 404);
+      }
     }
 
     var result = {};
@@ -89,8 +93,30 @@ function doPost(e) {
         }
         break;
 
+      case 'create_sheet':
+        if (!sheetName || sheetName === 'Sheet1') {
+          return createResponse({error: 'Valid sheetName required for creating new sheet'}, 400);
+        }
+
+        // 시트가 이미 존재하는지 확인
+        var existingSheet = sheet.getSheetByName(sheetName);
+        if (existingSheet) {
+          result = {success: true, action: 'create_sheet', message: 'Sheet already exists', sheetName: sheetName};
+        } else {
+          // 새 시트 생성
+          var newSheet = sheet.insertSheet(sheetName);
+          result = {success: true, action: 'create_sheet', sheetName: sheetName, sheetId: newSheet.getSheetId()};
+        }
+        break;
+
+      case 'get_sheet_names':
+        var sheets = sheet.getSheets();
+        var sheetNames = sheets.map(function(s) { return s.getName(); });
+        result = {success: true, action: 'get_sheet_names', sheet_names: sheetNames, count: sheetNames.length};
+        break;
+
       default:
-        return createResponse({error: 'Invalid action. Use: update, append, clear, overwrite'}, 400);
+        return createResponse({error: 'Invalid action. Use: update, append, clear, overwrite, create_sheet, get_sheet_names'}, 400);
     }
 
     return createResponse(result);
