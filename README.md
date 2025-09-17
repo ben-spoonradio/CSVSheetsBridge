@@ -60,7 +60,7 @@ Ad, Cost (sum), Impressions (sum), Clicks (sum), Installs (sum), Unique Users - 
 
 ### 2. 저장소 클론 및 설정
 ```bash
-git clone https://github.com/yourusername/CSVSheetsBridge.git
+git clone https://github.com/ben-spoonradio/CSVSheetsBridge.git
 cd CSVSheetsBridge
 ```
 
@@ -270,8 +270,8 @@ A: Data_dua.csv 파일이 프로젝트 디렉토리에 있는지 확인하거나
 
 ## 📞 지원
 
-- 이슈 리포트: [GitHub Issues](https://github.com/yourusername/CSVSheetsBridge/issues)
-- 기능 요청: [GitHub Discussions](https://github.com/yourusername/CSVSheetsBridge/discussions)
+- 이슈 리포트: [GitHub Issues](https://github.com/ben-spoonradio/CSVSheetsBridge/issues)
+- 기능 요청: [GitHub Discussions](https://github.com/ben-spoonradio/CSVSheetsBridge/discussions)
 
 ---
 
