@@ -11,6 +11,7 @@ Appsflyer CSV 데이터를 자동으로 처리하고 Google Sheets에 업데이�
 - 🎯 **스마트 분석**: D1 Retained CAC, CPI, CTR 등 핵심 성과 지표 자동 계산
 - 📊 **성과 등급**: A~D 등급 자동 부여로 광고 성과 한눈에 파악
 - 🔍 **시트 자동 감지**: 기존 Google Sheets 시트명을 자동으로 찾아 활용
+- ⚡ **수식 기반 업데이트**: 메인 데이터만 실제 값, 나머지는 수식으로 실시간 연동
 - 🛡️ **OAuth 불필요**: Google Apps Script를 통한 간단한 인증 시스템
 
 ## 📋 처리 가능한 데이터
@@ -21,10 +22,18 @@ Ad, Cost (sum), Impressions (sum), Clicks (sum), Installs (sum), Unique Users - 
 ```
 
 ### 출력 결과
-- **메인 데이터**: 전체 광고 데이터 + 계산된 KPI
-- **요약 통계**: 매체별/테마별 분포 및 평균 지표
-- **상위 성과**: Top 10 광고 랭킹
-- **피벗 분석**: 매체별 교차 분석 테이블
+
+#### 표준 방식
+- **메인 데이터**: 전체 광고 데이터 + 계산된 KPI (실제 값)
+- **요약 통계**: 매체별/테마별 분포 및 평균 지표 (실제 값)
+- **상위 성과**: Top 10 광고 랭킹 (실제 값)
+- **피벗 분석**: 매체별 교차 분석 테이블 (실제 값)
+
+#### 수식 기반 방식 ⭐ 추천
+- **메인 데이터**: 전체 광고 데이터 + 계산된 KPI (실제 값)
+- **요약 통계**: 수식으로 메인 데이터 참조 (자동 계산)
+- **상위 성과**: 수식으로 자동 정렬 TOP 10 (자동 업데이트)
+- **피벗 분석**: 수식으로 동적 집계 (실시간 반영)
 
 ## 🚀 빠른 시작
 
@@ -75,6 +84,8 @@ GOOGLE_SHEETS_ACCESS_TOKEN=YourSecureToken
 ```
 
 ### 5. 실행
+
+#### 표준 방식 (모든 데이터를 실제 값으로 업데이트)
 ```bash
 # 기본 실행
 python appsflyer_automation_real.py --csv Data_dua.csv
@@ -84,6 +95,18 @@ python appsflyer_automation_real.py --csv Data_dua.csv --backup
 
 # 처리된 데이터 CSV로도 저장
 python appsflyer_automation_real.py --csv Data_dua.csv --backup --export
+```
+
+#### 수식 기반 방식 (메인 데이터만 실제 값, 나머지는 수식으로 참조) ⭐ 추천
+```bash
+# 수식 기반 실행
+python appsflyer_automation_formula.py --csv Data_dua.csv
+
+# 백업과 함께 실행
+python appsflyer_automation_formula.py --csv Data_dua.csv --backup
+
+# 처리된 데이터 CSV로도 저장
+python appsflyer_automation_formula.py --csv Data_dua.csv --backup --export
 ```
 
 ## 📊 사용 예시
@@ -128,12 +151,19 @@ python appsflyer_automation_real.py --csv Data_dua.csv --backup --export
 
 ## ⚙️ 명령행 옵션
 
+### 공통 옵션 (두 스크립트 모두 지원)
 | 옵션 | 설명 | 예시 |
 |------|------|------|
 | `--csv` | 처리할 CSV 파일 경로 | `--csv Data_dua.csv` |
 | `--backup` | 업데이트 전 현재 데이터 백업 | `--backup` |
 | `--export` | 처리된 데이터를 CSV로 내보내기 | `--export` |
 | `--verbose` | 상세 로그 출력 | `--verbose` |
+
+### 스크립트별 특징
+| 스크립트 | 특징 | 장점 | 단점 |
+|----------|------|------|------|
+| `appsflyer_automation_real.py` | 모든 시트에 실제 값 입력 | 안정적, 독립적 | 데이터 중복, 수동 업데이트 |
+| `appsflyer_automation_formula.py` | 수식 기반 자동 연동 | 실시간 동기화, 효율적 | Google Sheets 의존적 |
 
 ## 📈 KPI 계산 방식
 
@@ -149,24 +179,49 @@ python appsflyer_automation_real.py --csv Data_dua.csv --backup --export
 - **C등급** (상위 51-80%): 보통 성과
 - **D등급** (하위 20%): 개선 필요
 
+## ⚡ 수식 기반 방식의 장점
+
+### 🔄 실시간 자동 업데이트
+- 메인 데이터가 변경되면 **즉시** 모든 시트가 자동 업데이트
+- 수동으로 다시 실행할 필요 없음
+
+### 📊 동적 분석
+```excel
+# 요약 시트 수식 예시
+총 콘텐츠 수: =COUNTA(메인데이터!A:A)-1
+총 비용: =SUM(메인데이터!B:B)
+Echo 매체 수: =COUNTIF(메인데이터!H:H,"echo")
+
+# 상위성과 시트 수식 예시 (자동 정렬)
+1위 광고: =INDEX(SORT(메인데이터!A2:Z1000,메인데이터!Y2:Y1000,1),1,1)
+1위 CAC: =INDEX(SORT(메인데이터!A2:Z1000,메인데이터!Y2:Y1000,1),1,16)
+```
+
+### 🚀 효율성
+- **네트워크 트래픽 감소**: 메인 데이터만 전송
+- **처리 시간 단축**: 계산 로직이 Google Sheets에서 실행
+- **유지보수 용이**: 비즈니스 로직 변경 시 수식만 수정
+
 ## 📁 프로젝트 구조
 
 ```
 CSVSheetsBridge/
-├── 📄 appsflyer_automation_real.py     # 메인 실행 스크립트
-├── 📄 requirements.md                   # 프로젝트 요구사항 명세
+├── 📄 appsflyer_automation_real.py        # 표준 방식 실행 스크립트
+├── 📄 appsflyer_automation_formula.py     # 수식 기반 실행 스크립트 ⭐
+├── 📄 requirements.md                      # 프로젝트 요구사항 명세
+├── 📄 PROJECT_SUMMARY.md                  # 프로젝트 완료 보고서
 ├── 📁 src/
-│   ├── 📄 appsflyer_processor_adapted.py   # 데이터 처리기
-│   ├── 📄 sheets_updater.py                # Google Sheets 업데이터
-│   ├── 📄 sheets_detector.py               # 시트 자동 감지
-│   └── 📄 sheets_client.py                 # Google Sheets 클라이언트
+│   ├── 📄 appsflyer_processor_adapted.py      # 데이터 처리기
+│   ├── 📄 sheets_updater.py                   # Google Sheets 업데이터
+│   ├── 📄 sheets_detector.py                  # 시트 자동 감지
+│   └── 📄 sheets_client.py                    # Google Sheets 클라이언트
 ├── 📁 apps_script/
-│   └── 📄 Code.gs                          # Google Apps Script 코드
+│   └── 📄 Code.gs                             # Google Apps Script 코드
 ├── 📁 examples/
-│   ├── 📄 basic_usage.py                   # 기본 사용법 예시
-│   └── 📄 csv_integration.py               # CSV 통합 예시
+│   ├── 📄 basic_usage.py                      # 기본 사용법 예시
+│   └── 📄 csv_integration.py                  # CSV 통합 예시
 └── 📁 config/
-    └── 📄 settings.py                      # 설정 관리
+    └── 📄 settings.py                         # 설정 관리
 ```
 
 ## 🔧 문제 해결
