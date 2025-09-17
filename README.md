@@ -37,18 +37,24 @@ Ad, Cost (sum), Impressions (sum), Clicks (sum), Installs (sum), Unique Users - 
 
 ## 🚀 빠른 시작
 
-### 1. Google Apps Script 설정
+### 1. 저장소 클론
+```bash
+git clone https://github.com/ben-spoonradio/CSVSheetsBridge.git
+cd CSVSheetsBridge
+```
 
-#### 1-1. Google Apps Script 프로젝트 생성
+### 2. Google Apps Script 설정
+
+#### 2-1. Google Apps Script 프로젝트 생성
 1. [Google Apps Script](https://script.google.com) 접속
 2. Google 계정으로 로그인
 3. "새 프로젝트" 클릭
 4. 프로젝트 이름 변경 (예: "SheetsAPI")
 
-#### 1-2. Apps Script 코드 복사
+#### 2-2. Apps Script 코드 복사
 `apps_script/Code.gs` 파일의 내용을 Google Apps Script 편집기에 복사합니다.
 
-#### 1-3. 웹 앱으로 배포
+#### 2-3. 웹 앱으로 배포
 1. Apps Script 편집기에서 "배포" > "새 배포" 클릭
 2. 유형 선택: "웹 앱"
 3. 설정:
@@ -57,12 +63,6 @@ Ad, Cost (sum), Impressions (sum), Clicks (sum), Installs (sum), Unique Users - 
    - 액세스 권한: "모든 사용자" (또는 "Google 계정이 있는 모든 사용자")
 4. "배포" 클릭
 5. 웹 앱 URL 복사 (예: `https://script.google.com/macros/s/SCRIPT_ID/exec`)
-
-### 2. 저장소 클론 및 설정
-```bash
-git clone https://github.com/ben-spoonradio/CSVSheetsBridge.git
-cd CSVSheetsBridge
-```
 
 ### 3. 의존성 설치
 ```bash
