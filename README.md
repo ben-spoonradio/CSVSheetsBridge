@@ -60,7 +60,7 @@ cd CSVSheetsBridge
 3. 설정:
    - 설명: "Sheets API Web App"
    - 실행 계정: "나"
-   - 액세스 권한: "모든 사용자" (또는 "Google 계정이 있는 모든 사용자")
+   - 액세스 권한: "모든 사용자"
 4. "배포" 클릭
 5. 웹 앱 URL 복사 (예: `https://script.google.com/macros/s/SCRIPT_ID/exec`)
 
